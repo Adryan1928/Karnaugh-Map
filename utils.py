@@ -14,6 +14,15 @@ def calcNumberOfGroups(variables):
     groups.sort(reverse=True)
     return groups
 
+def calcPositions1(linesUsed):
+    positions = []
+    for y in range(len(linesUsed)):
+        for x in range(len(linesUsed[y])):
+            if linesUsed[y][x] == 1:
+                positions.append({"x": x, "y": y})
+    return positions
+
+
 def positionsIf(positions, linesUsed):
     isTrue = True
 
@@ -25,9 +34,7 @@ def positionsIf(positions, linesUsed):
 
 def calcPositions(initialPositionRelative, group, numColumns):
     positions = [initialPositionRelative]
-    print("initialPositionRelative", initialPositionRelative, group)
     for i in range(1, group):
-        print("i", i)
         if (initialPositionRelative["x"] + group <= numColumns):
             x = initialPositionRelative["x"] + i
         else:
@@ -37,7 +44,6 @@ def calcPositions(initialPositionRelative, group, numColumns):
                 x = initialPositionRelative["x"] + i - numColumns
         y = initialPositionRelative["y"]
         positions.append({"x": x, "y": y})
-    print("positions", positions)
     return positions
 
 def existsInGroup(groupsPerPosition, groupPossibilities):
@@ -109,3 +115,38 @@ def callIf(initialPosition, group, linesUsed, groupsPerPosition, index):
             finalGroups.append(groupPossibility)
     
     return finalGroups
+
+
+def position2string(positions, variables, variablesUsed):
+    stringsPerPositions = []
+    for position in positions:
+        # TODO: Colocar para mais variáveis e mais dinâmico
+        initialString = []
+        for variable in variablesUsed:
+            if variable == 'A':
+                initialString.append('-A' if position["y"] == 0 or position['y'] == 3 else 'A')
+            if variable == 'B':
+                initialString.append('-B' if position["x"] < 2 else 'B')
+            if variable == 'C':
+                initialString.append('-C' if position["x"] == 0 or position["x"] == 3 else 'C')
+            if variable == 'D':
+                initialString.append('-D' if position["y"] < 2 else 'D')
+        stringsPerPositions.append(initialString)
+
+    preString = ''
+    for iVariable in range(variables):
+        if len(stringsPerPositions) == 1:
+            preString += stringsPerPositions[0][iVariable]
+        else:
+            isVariable = True
+            for x in range(len(stringsPerPositions)-1):
+                if stringsPerPositions[x][iVariable] != stringsPerPositions[x+1][iVariable]:
+                    isVariable = False
+                
+            if isVariable:
+                preString += stringsPerPositions[x][iVariable]
+        
+
+    string = preString
+
+    return string

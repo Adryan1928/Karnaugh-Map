@@ -2,11 +2,11 @@ import pandas as pd
 from utils import *
 
 map = getMap()
-# print(map.keys()) # Output: ['V', '"00"', '"01"', '"11"', '"10"']
 
 # Todo: input
-variables = 3
-nameVariables = ['A', 'B', 'C', 'D']
+variables = int(input('Quantas variáveis? '))
+nameVariables = ['A', 'B', 'C', 'D'] # Torna dinâmico para mais variáveis
+variablesUsed = nameVariables[:variables]
 groups = calcNumberOfGroups(variables)
 
 lines = [list(map.to_numpy()[i])[1:] for i in range(len(map['V']))]
@@ -14,45 +14,13 @@ lines = [list(map.to_numpy()[i])[1:] for i in range(len(map['V']))]
 index = 2 ** (variables / 2) if variables % 2 == 0 else 2 ** ((variables-1) / 2)
 linesUsed = lines[0: int(index)]
 
-
-def position2string(position):
-    # position = [[0, 0], [0, 1]]
-    stringsPerPosition = []
-    for i in range(len(position)):
-        # Dps tem que adaptar para mais variáveis
-        first = '-A' if position[i][0] == 0 else 'A'
-        second = '-B' if position[i][1] < 2 else 'B'
-        third = '-C' if position[i][1] == 0 or position[i][1] == 3 else 'C'
-        stringsPerPosition.append([first, second, third])
-
-    preString = ''
-    for i in range(len(stringsPerPosition[0])):
-        if stringsPerPosition[0][i] == stringsPerPosition[1][i]:
-            if (len(stringsPerPosition) > 2):
-                next = False
-                for x in range(2, len(stringsPerPosition)):
-                    if stringsPerPosition[0][i] == stringsPerPosition[x][i]:
-                        next = True
-                        # preString += stringsPerPosition[0][i]
-                    else:
-                        next = False
-                    
-                    if next and x == len(stringsPerPosition) - 1:
-                        preString += stringsPerPosition[0][i]
-            else:
-                preString += stringsPerPosition[0][i]
-        else:
-            pass
-
-    string = preString
-
-    return string
+positions1 = calcPositions1(linesUsed)
 
 
-def main(groups):
+def main():
     groupsOfMap = []
     groupsPerPosition = []
-    for index in range(len(groups)):
+    for index in range(len(groups) - 1):
         group = groups[index]
         initialPositions = []
         if (index == 0):
@@ -72,15 +40,28 @@ def main(groups):
                 if len(groupsOfPositions) > 0:
                     for groupOfPositions in groupsOfPositions:
                         groupsPerPosition.append(groupOfPositions)
+                        string = position2string(groupOfPositions, variables, variablesUsed)
+                        groupsOfMap.append(string)
                         # groupsOfMap.append(position2string(groupOfPositions))
-                else:
-                    pass
-            else:
-                pass
+    
+    for position in positions1:
+        if not existsInGroup(groupsPerPosition, [position]):
+            groupsPerPosition.append([position])
+            string = position2string([position], variables, variablesUsed)
+            groupsOfMap.append(string)
+    
     print(groupsPerPosition)
     return groupsOfMap
 
                 
 
-groupsKarnaugh = main(groups)
-print(groupsKarnaugh)
+groupsKarnaugh = main()
+
+formula = ''
+for i in range(len(groupsKarnaugh)):
+    if (i == len(groupsKarnaugh) - 1):
+        formula += f'{groupsKarnaugh[i]}'
+    else:
+        formula += f'{groupsKarnaugh[i]} + '
+
+print(formula)
