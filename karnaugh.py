@@ -2,12 +2,17 @@ import pandas as pd
 from utils import *
 
 map = getMap()
-# print(map.keys()) # Output: ['A - B/C', '"00"', '"01"', '"11"', '"10"']
+# print(map.keys()) # Output: ['V', '"00"', '"01"', '"11"', '"10"']
 
+# Todo: input
 variables = 3
-nameVariables = ['A', 'B', 'C']
+nameVariables = ['A', 'B', 'C', 'D']
 groups = calcNumberOfGroups(variables)
 
+lines = [list(map.to_numpy()[i])[1:] for i in range(len(map['V']))]
+
+index = 2 ** (variables / 2) if variables % 2 == 0 else 2 ** ((variables-1) / 2)
+linesUsed = lines[0: int(index)]
 
 
 def position2string(position):
@@ -44,59 +49,38 @@ def position2string(position):
     return string
 
 
-def getGroups(groups):
-    notA = map.loc[0].values[1:]
-    yesA = map.loc[1].values[1:]
-    print(notA)
-    print(yesA)
-
+def main(groups):
     groupsOfMap = []
+    groupsPerPosition = []
+    for index in range(len(groups)):
+        group = groups[index]
+        initialPositions = []
+        if (index == 0):
+            if linesUsed[0][0] == 1:
+                initialPositions.append({"x": 0, "y": 0})
+        else:
+            for y in range(len(linesUsed)):
+                for x in range(len(linesUsed[y])):
+                    if linesUsed[y][x] == 1:
+                        initialPositions.append({"x": x, "y": y})
 
-    for i in range(groups[0]):
-        groupInTurn = False
-        for x in range(2):
-            if i < groups[0]/2:
-                initialPosition = [0, i]
-            else:
-                initialPosition = [1, i-groups[0]/2]
-        next = True
-        while next:
+                        
+        for initialPosition in initialPositions:
+            if (group != 1):
 
-            # Verificar notA or yesA
-            if initialPosition[0] == 0:
-                if notA[initialPosition[1]] == 1:
-                    if initialPosition[1] != len(notA) - 1:
-                        if notA[initialPosition[1] + 1] == 1:
-                            groupInTurn = True
-                            print("oi")
-                            string = position2string([initialPosition,
-                            [initialPosition[0], initialPosition[1] + 1]])
-                            groupsOfMap.append(string)
-
-                            if notA[initialPosition[1] + 2] == 1:
-                                print("True??")
-                                pass
-                            else:
-                                # Verificar para baixo
-                                print('False')
-                                next = False
-                                break
-
-                        else:
-                            # Verificar para baixo
-                            next = False
-                    else:
-                        # Verificar se é a última posição, se sim, verificar a primeira e dps para baixo
-                        pass
+                groupsOfPositions = callIf(initialPosition, group, linesUsed, groupsPerPosition, index)
+                if len(groupsOfPositions) > 0:
+                    for groupOfPositions in groupsOfPositions:
+                        groupsPerPosition.append(groupOfPositions)
+                        # groupsOfMap.append(position2string(groupOfPositions))
                 else:
-                    next = False
+                    pass
             else:
-                next = False
                 pass
-        
+    print(groupsPerPosition)
     return groupsOfMap
 
                 
 
-groupsKarnaugh = getGroups(groups)
+groupsKarnaugh = main(groups)
 print(groupsKarnaugh)
